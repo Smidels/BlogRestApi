@@ -19,6 +19,9 @@ urlpatterns = [
 	url(r'^api-token-refresh/', refresh_jwt_token),
 	url(r'^api-token-verify/', verify_jwt_token),
 
+	url(r'^like/', views.like),
+	url(r'^unlike/', views.unlike),
+
 	# basic auth for REST API
 	# url(r'^api-auth/', include('rest_framework.urls')),
 ]

@@ -38,3 +38,32 @@ def api_root(request, format=None):
 		'users': reverse('user-list', request=request, format=format),
 		'posts': reverse('post-list', request=request, format=format)
 		})
+
+
+
+@api_view(['POST'])
+def like(request):
+
+	# Like to the object
+
+	post_id = request.data['post']
+	user_id = request.user.id
+	post = Post.objects.get(id=post_id)
+	
+	if request.method == 'POST':
+		post.votes.up(user_id)
+		return Response({'you like': post.text})
+
+
+@api_view(['POST'])
+def unlike(request):
+
+	# Down like to the object
+	
+	post_id = request.data['post']
+	user_id = request.user.id
+	post = Post.objects.get(id=post_id)
+	
+	if request.method == 'POST':
+		post.votes.down(user_id)
+		return Response({'unlike': post.text})

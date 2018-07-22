@@ -7,11 +7,11 @@ from blog.models import Post
 class PostSerializer(serializers.HyperlinkedModelSerializer):
 	owner = serializers.ReadOnlyField(source='owner.username')
 	
-	votes = serializers.ReadOnlyField(source='votes.count')
+	likes = serializers.ReadOnlyField(source='votes.count')
 
 	class Meta:
 		model = Post
-		fields = ('url', 'owner', 'id', 'text', 'votes')
+		fields = ('url', 'owner', 'id', 'text', 'likes')
 
 
 
