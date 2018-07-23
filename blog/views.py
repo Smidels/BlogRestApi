@@ -46,11 +46,13 @@ def like(request):
 
 	# Like to the object
 
-	post_id = request.data['post']
-	user_id = request.user.id
-	post = Post.objects.get(id=post_id)
-	
-	if request.method == 'POST':
+	if request.user.is_anonymous:
+		return Response({'anonymous user': "can't like or unlike"})
+
+	elif request.method == 'POST':
+		user_id = request.user.id
+		post_id = request.data['post']
+		post = Post.objects.get(id=post_id)
 		post.votes.up(user_id)
 		return Response({'you like': post.text})
 
@@ -58,12 +60,14 @@ def like(request):
 @api_view(['POST'])
 def unlike(request):
 
-	# Down like to the object
+	# Unlike to the object
 	
-	post_id = request.data['post']
-	user_id = request.user.id
-	post = Post.objects.get(id=post_id)
-	
-	if request.method == 'POST':
+	if request.user.is_anonymous:
+		return Response({'anonymous user': "can't like or unlike"})
+
+	elif request.method == 'POST':
+		user_id = request.user.id
+		post_id = request.data['post']
+		post = Post.objects.get(id=post_id)
 		post.votes.down(user_id)
-		return Response({'unlike': post.text})
+		return Response({'you unlike': post.text})
