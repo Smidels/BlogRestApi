@@ -22,6 +22,8 @@ urlpatterns = [
 	url(r'^like/', views.like),
 	url(r'^unlike/', views.unlike),
 
+	url(r'^bot/', views.run_bot),
+
 	# basic auth for REST API
 	# url(r'^api-auth/', include('rest_framework.urls')),
 ]
