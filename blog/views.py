@@ -4,7 +4,7 @@ from string import ascii_lowercase, digits
 import requests
 
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login
 from rest_framework import generics, permissions, renderers, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -94,6 +94,8 @@ def unlike(request):
 		return Response({'you unlike': post.text})
 
 
+
+
 @api_view(['POST'])
 def run_bot(request):
 
@@ -103,14 +105,11 @@ def run_bot(request):
 
 	if request.data['bot'] == 'run':
 		conf = get_conf_dict()
+		users_data = singup(conf['number_of_users'])
+		posts_id = posts_generator(conf['max_posts_per_user'], users_data)
+		likes_generator(conf['max_likes_per_user'], posts_id)
 
-	# actions = {'singup': singup,
-	# 		   'add_posts': add_posts,
-	# 		   'add_likes': add_likes}
-
-		users = singup(conf['number_of_users'])
-
-		return Response(users)
+		return Response(users_data)
 
 
 def get_conf_dict():
@@ -128,7 +127,7 @@ def get_conf_dict():
 	return conf_dict
 
 
-def singup(numb_users):
+def singup(num_users):
 
 	"""
 	Automaticaly registers users
@@ -139,40 +138,92 @@ def singup(numb_users):
 
 	domain_names = ['@ukr.net', '@gmail.com']
 	users_data = {}
-	for i in range(numb_users):
+	for i in range(num_users):
+
 		# Generation username, password and email.
 
 		username = ''
 		len_username = choice(range(min_len, max_len))
-		for i in range(len_username):
+		for _ in range(len_username):
 			username += choice(ascii_lowercase)
-
 		email = username + choice(domain_names)
-
 		password = ''
-		for i in range(min_len, max_len):
+		for _ in range(min_len, max_len):
 			password += choice(ascii_lowercase + digits)
 		user = User.objects.create_user(username=username,
 									    email=email,
 									    password=password
 									    )
-		users_data[i] = {username: password}
-		print('Register {}, password={}, email={}'.format(username, password, email))
+		users_data[i] = {'username': username,
+						 'password': password}
+		print('Register {}, password={}, email={}'.format(
+														  username,
+														  password,
+														  email
+														  ))
 	return users_data
 
 
-def gener_posts(numb_posts, users_data):
+def get_random_text():
 
 	"""
-	Generation posts for all users
+	Generate random text
 	"""
 
-	max_word = 5
+	max_word = 10
 	word_site = "http://svnweb.freebsd.org/csrg/share/dict/words?view=co&content-type=text/plain"
 	response = requests.get(word_site)
 	words = response.content.splitlines()
 	post = ''
-	for i in max_word:
-		post += choice(words)
-	#post.capitalize() += '.'
+	for i in range(max_word):
+		post += choice(words).decode("utf-8") + ' '
+	post += '.'
+	post.capitalize()
+	return post
 
+
+
+def posts_generator(max_num_posts, users_data):
+
+	"""
+	Add posts from users
+	"""
+	posts_id = []
+	for i in users_data:
+
+		username = users_data[i]['username']
+		password = users_data[i]['password']
+		user = User.objects.get(username=username)
+		num_posts = choice(range(max_num_posts))
+
+		for _ in range(num_posts):
+			text = get_random_text()
+			post = Post(text=text, owner=user)
+			post.save()
+			posts_id.append(post.id)
+			print('User {} add post {}'.format(username, post))
+	return posts_id
+
+
+def likes_generator(max_num_likes, posts_id):
+
+	"""
+	Add like to posts
+	"""
+
+	users_id = User.objects.values_list('id')
+	
+	for post_id in posts_id:
+		num_likes = choice(range(max_num_likes))
+		post = Post.objects.get(id=post_id)
+
+		while True:
+			if post.votes.count() == num_likes:
+				break
+
+			user_id = choice(users_id)[0]
+			post = Post.objects.get(id=post_id)
+			post.votes.up(user_id)
+			username = User.objects.get(id=user_id).username
+			print('User "{}"" like "{}"'.format(username, post.text))
+	

@@ -3,6 +3,7 @@ from rest_framework import serializers
 #from rest_framework.decorators import api_view
 from blog.models import Post
 
+user = User
 
 class PostSerializer(serializers.HyperlinkedModelSerializer):
 	owner = serializers.ReadOnlyField(source='owner.username')
