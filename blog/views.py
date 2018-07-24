@@ -9,6 +9,7 @@ from rest_framework import generics, permissions, renderers, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
+from rest_framework import status
 
 
 from blog.models import Post
@@ -66,14 +67,14 @@ def like(request):
 	"""
 	
 	if request.user.is_anonymous:
-		return Response({'anonymous user': "can't like or unlike"})
+		return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
 
 	elif request.method == 'POST':
 		user_id = request.user.id
 		post_id = request.data['post']
 		post = Post.objects.get(id=post_id)
 		post.votes.up(user_id)
-		return Response({'you like': post.text})
+		return Response(status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -84,14 +85,14 @@ def unlike(request):
 	"""
 	
 	if request.user.is_anonymous:
-		return Response({'anonymous user': "can't like or unlike"})
+		return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
 
 	elif request.method == 'POST':
 		user_id = request.user.id
 		post_id = request.data['post']
 		post = Post.objects.get(id=post_id)
 		post.votes.down(user_id)
-		return Response({'you unlike': post.text})
+		return Response(status=status.HTTP_200_OK)
 
 
 
@@ -109,7 +110,10 @@ def run_bot(request):
 		posts_id = posts_generator(conf['max_posts_per_user'], users_data)
 		likes_generator(conf['max_likes_per_user'], posts_id)
 
-		return Response(users_data)
+	else:
+		return Response({'To start the bot, you must enter bot=run'}, status=status.HTTP_400_BAD_REQUEST)
+	
+	return Response(users_data, status=status.HTTP_201_CREATED)
 
 
 def get_conf_dict():
@@ -118,13 +122,26 @@ def get_conf_dict():
 	Reading config file and create dict with info
 	"""
 
-	path_to_conf = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'blog\\config\\config.conf')
-	with open(path_to_conf, 'r') as f:
-		lines = [i for i in f.read().split('\n') if i != '']
-		create_action = [i.split(':')[0] for i in lines]
-		value = [int(i.split(':')[1]) for i in lines]
-		conf_dict = dict(zip(create_action, value))
+	path_to_conf = os.path.join(os.path.dirname(
+								os.path.dirname(__file__)),
+								'blog\\config\\config.conf'
+								)
+	message = {'configuration file can not be read',
+			   'for example:\nnumber_of_users:2\n\
+				max_posts_per_user:4\n\
+				max_likes_per_user:6'
+				}
+	try:
+		with open(path_to_conf, 'r') as f:
+			lines = [i for i in f.read().split('\n') if i != '']
+			create_action = [i.split(':')[0] for i in lines]
+			value = [int(i.split(':')[1]) for i in lines]
+			conf_dict = dict(zip(create_action, value))
+
+	except: 
+		return Response(message)
 	return conf_dict
+	
 
 
 def singup(num_users):
@@ -134,26 +151,32 @@ def singup(num_users):
 	"""
 
 	min_len = 8
-	max_len = 20
+	max_len = 16
 
 	domain_names = ['@ukr.net', '@gmail.com']
 	users_data = {}
 	for i in range(num_users):
 
-		# Generation username, password and email.
-
 		username = ''
 		len_username = choice(range(min_len, max_len))
+
 		for _ in range(len_username):
 			username += choice(ascii_lowercase)
 		email = username + choice(domain_names)
 		password = ''
+
 		for _ in range(min_len, max_len):
 			password += choice(ascii_lowercase + digits)
-		user = User.objects.create_user(username=username,
+
+		try:
+			user = User.objects.create_user(username=username,
 									    email=email,
 									    password=password
 									    )
+		except:
+			print('Could not register "{}"'.format(username))
+			continue
+		
 		users_data[i] = {'username': username,
 						 'password': password}
 		print('Register {}, password={}, email={}'.format(
@@ -175,9 +198,9 @@ def get_random_text():
 	response = requests.get(word_site)
 	words = response.content.splitlines()
 	post = ''
+
 	for i in range(max_word):
 		post += choice(words).decode("utf-8") + ' '
-	post += '.'
 	post.capitalize()
 	return post
 
@@ -190,10 +213,14 @@ def posts_generator(max_num_posts, users_data):
 	"""
 	posts_id = []
 	for i in users_data:
+		try:
+			username = users_data[i]['username']
+			password = users_data[i]['password']
+			user = User.objects.get(username=username)
+		except:
+			return Response({'User "{}"'.format(username): ' not found'})
+			break
 
-		username = users_data[i]['username']
-		password = users_data[i]['password']
-		user = User.objects.get(username=username)
 		num_posts = choice(range(max_num_posts))
 
 		for _ in range(num_posts):
@@ -212,7 +239,7 @@ def likes_generator(max_num_likes, posts_id):
 	"""
 
 	users_id = User.objects.values_list('id')
-	
+
 	for post_id in posts_id:
 		num_likes = choice(range(max_num_likes))
 		post = Post.objects.get(id=post_id)
