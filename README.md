@@ -23,10 +23,13 @@
 3. Install requirements:
 ```
 > pip install -r requirements.txt
+```
+4. Run our server:
+```
 (venv)>python manage.py runserver
 ```
 
-#### You can use httpie for HTTP requests. To do this, install httpie (you must use another termonal):
+#### You can use httpie for HTTP requests. To do this, install httpie (you must use another terminal):
 ```
 >pip install httpie
 ```
@@ -51,9 +54,26 @@
 ```
 >http -a you_nickname:you_password123 http://127.0.0.1:8000/posts/ text="some text"
 ```
+#### Delete post:
+```
+>http -a you_nickname:you_password123 DELETE http://127.0.0.1:8000/posts/4/
+```
+> 4 it is id_post
+> Note: you can delete only your post
 
-http://127.0.0.1:8000/rest-auth/like/
+#### Like post:
+```
+>http http://127.0.0.1:8000/like/ post=3
+```
+> 3 it is id_post
 
-http://127.0.0.1:8000/rest-auth/unlike/
+#### Unlike post:
+```
+>http http://127.0.0.1:8000/unlike/ post=3
+```
+> 3 it is id_post
 
-http://127.0.0.1:8000/rest-auth/bot/
+#### Run bot:
+```
+http http://127.0.0.1:8000/bot/ bot=run
+```
