@@ -3,14 +3,14 @@
 ``BlogRestApi`` is a simple Rest Api Blog.
 
 
-Basic functions:
-*user singup
-*user login
-*post like
-*post unlike
-
+### Basic functions:
+* user singup
+* user login
+* post like
+* post unlike
 
 ### Getting Started
+
 ```
 > git clone  https://github.com/Smidels/BlogRestApi.git
 > cd BlogRestApi
@@ -19,4 +19,3 @@ Basic functions:
 (venv)>python manage.py runserver
 ```
 #### Use Blog API
-
