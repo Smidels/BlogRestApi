@@ -85,7 +85,7 @@ max_likes_per_user:6
 ```
 > Other key values no need to be included!
 
-If config file is valid, bot register users, and create posts on their behalf. Likes is received from an accidental user.
+If config file is valid, bot register users, and create posts on their behalf. Likes are generated from an accidental user.
 
 #### Run bot:
 ```

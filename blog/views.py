@@ -1,7 +1,8 @@
+import requests
+import time
 import os, sys
 from random import choice
 from string import ascii_lowercase, digits
-import requests
 
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
@@ -10,7 +11,6 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework import status
-
 
 from blog.models import Post
 from blog.serializers import PostSerializer, UserSerializer
@@ -105,17 +105,32 @@ def run_bot(request):
 	"""
 	Launch bot
 	"""
-
-	if request.data['bot'] == 'run':
+	start_time = time.time()
+	message = {"Config file can't be read!"}
+	if request.data['run'] == "True":
 		conf = get_conf_dict()
+
+		try:
+			keys = ['number_of_users', 'max_posts_per_user', 'max_likes_per_user']
+
+			for key in conf:
+				if conf[key] < 1:
+					return Response({'Numbers must be greates than zero'})
+		except:
+			return Response(message)
+
 		users_data = singup(conf['number_of_users'])
 		posts_id = posts_generator(conf['max_posts_per_user'], users_data)
 		likes_generator(conf['max_likes_per_user'], posts_id)
 
 	else:
-		return Response({'To start the bot, you must enter bot=run'}, status=status.HTTP_400_BAD_REQUEST)
-	
-	return Response(users_data, status=status.HTTP_201_CREATED)
+		return Response({'To start the bot, you must enter run=True'},
+		 				status=status.HTTP_400_BAD_REQUEST)
+	finish_time = time.time()
+	timer = int(finish_time - start_time)
+	timer = 'Spend time {} c.'.format(timer)
+	print(timer)
+	return Response({timer}, status=status.HTTP_201_CREATED)
 
 
 def get_conf_dict():
@@ -128,20 +143,17 @@ def get_conf_dict():
 								os.path.dirname(__file__)),
 								'blog\\config\\config.conf'
 								)
-	message = {'configuration file can not be read',
-			   'for example:\nnumber_of_users:2\n\
-				max_posts_per_user:4\n\
-				max_likes_per_user:6'
-				}
+
 	try:
 		with open(path_to_conf, 'r') as f:
 			lines = [i for i in f.read().split('\n') if i != '']
+
 			create_action = [i.split(':')[0] for i in lines]
 			value = [int(i.split(':')[1]) for i in lines]
-			conf_dict = dict(zip(create_action, value))
+	except:
+		return Response()
+	conf_dict = dict(zip(create_action, value))
 
-	except: 
-		return Response(message)
 	return conf_dict
 	
 
@@ -241,7 +253,9 @@ def likes_generator(max_num_likes, posts_id):
 	"""
 
 	users_id = User.objects.values_list('id')
-
+	if max_num_likes > len(users_id):
+		max_num_likes = len(users_id)
+		
 	for post_id in posts_id:
 		num_likes = choice(range(max_num_likes))
 		post = Post.objects.get(id=post_id)
