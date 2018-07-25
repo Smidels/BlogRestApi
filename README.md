@@ -26,13 +26,34 @@
 (venv)>python manage.py runserver
 ```
 
-### Usege Blog API
-
 #### You can use httpie for HTTP requests. To do this, install httpie (you must use another termonal):
 ```
 >pip install httpie
 ```
+
+### Usege Blog API
+
 #### Registration user:
 ```
->http POST http://127.0.0.1:8000/rest-auth/registration/ 
+>http http://127.0.0.1:8000/rest-auth/registration/ username=you_nickname email=you_email@gmail.com password1=you_password123 password2=you_password123 
 ```
+
+#### Login:
+```
+>http http://127.0.0.1:8000/rest-auth/login/ username=you_nickname password=you_password123 
+```
+##### or
+```
+>http -a you_nickname:you_password123  http://127.0.0.1:8000/ 
+```
+
+#### Add post:
+```
+>http -a you_nickname:you_password123 http://127.0.0.1:8000/posts/ text="some text"
+```
+
+http://127.0.0.1:8000/rest-auth/like/
+
+http://127.0.0.1:8000/rest-auth/unlike/
+
+http://127.0.0.1:8000/rest-auth/bot/
