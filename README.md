@@ -74,7 +74,20 @@
 ```
 > 3 it is id_post
 
+### Usage bot
+
+When you start the bot, it reads the data from config/config.conf.
+Example config.conf:
+```
+number_of_users:2
+max_posts_per_user:4
+max_likes_per_user:6
+```
+> Other key values no need to be included!
+
+If config file is valid, bot register users, and create posts on their behalf. Likes is received from an accidental user.
+
 #### Run bot:
 ```
-http http://127.0.0.1:8000/bot/ bot=run
+http http://127.0.0.1:8000/bot/ run=True
 ```
