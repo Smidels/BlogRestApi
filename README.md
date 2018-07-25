@@ -15,7 +15,7 @@
 ```
 > git clone https://github.com/Smidels/BlogRestApi.git
 ```
-2. Crecte virtual environment:
+2. Create virtual environment:
 ```
 > cd BlogRestApi
 > python -m venv venv
@@ -59,7 +59,6 @@
 ```
 >http -a you_nickname:you_password123 DELETE http://127.0.0.1:8000/posts/4/
 ```
-> 4 it is id_post
 > Note: you can delete only your post
 
 #### Like post:
@@ -72,7 +71,6 @@
 ```
 >http -a you_nickname:you_password123 http://127.0.0.1:8000/unlike/ post=3
 ```
-> 3 it is id_post
 
 ### Usage bot
 
