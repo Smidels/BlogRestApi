@@ -70,11 +70,12 @@ def like(request):
 		return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
 
 	elif request.method == 'POST':
-		user_id = request.user.id
+		user = request.user
+		user_id = user.id
 		post_id = request.data['post']
 		post = Post.objects.get(id=post_id)
 		post.votes.up(user_id)
-		return Response(status=status.HTTP_200_OK)
+		return Response({'User {} like post: {}.'.format(user.username, post.text)}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -88,11 +89,12 @@ def unlike(request):
 		return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
 
 	elif request.method == 'POST':
-		user_id = request.user.id
+		user = request.user
+		user_id = user.id
 		post_id = request.data['post']
 		post = Post.objects.get(id=post_id)
 		post.votes.down(user_id)
-		return Response(status=status.HTTP_200_OK)
+		return Response({'User {} unlike post: {}.'.format(user.username, post.text)}, status=status.HTTP_200_OK)
 
 
 

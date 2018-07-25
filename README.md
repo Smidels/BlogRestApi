@@ -34,7 +34,8 @@
 >pip install httpie
 ```
 
-### Usege Blog API
+### Usage Blog API
+
 
 #### Registration user:
 ```
@@ -63,13 +64,13 @@
 
 #### Like post:
 ```
->http http://127.0.0.1:8000/like/ post=3
+>http -a you_nickname:you_password123 http://127.0.0.1:8000/like/ post=3
 ```
 > 3 it is id_post
 
 #### Unlike post:
 ```
->http http://127.0.0.1:8000/unlike/ post=3
+>http -a you_nickname:you_password123 http://127.0.0.1:8000/unlike/ post=3
 ```
 > 3 it is id_post
 
